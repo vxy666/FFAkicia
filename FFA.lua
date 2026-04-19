@@ -211,10 +211,10 @@ local function createCyberButton(name, titleText, url, isPrimary, isStaff)
 end
 
 -- POPULATE MODULES WITH TITLES
-createCyberButton("Kicia Hook", "Core System Loader", "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau", true)
+createCyberButton("Kicia Hook", "kicia", "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau", true)
 createCyberButton("Auto Collect", "FFA Booster Automation", "https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784", false)
-createCyberButton("Anti-AFK", "Idle Prevention Protocol", "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK", false)
-createCyberButton("Staff Detector", "Moderator Surveillance", "https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua", false, true)
+createCyberButton("Anti-AFK", "Anti Afk", "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK", false)
+createCyberButton("Staff Detector", "staff detector", "https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua", false, true)
 createCyberButton("FPS Boost", "Graphics & Performance Optimizer", "https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost", false)
 
 -- Standard Toggle Logic
