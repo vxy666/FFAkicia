@@ -6,16 +6,14 @@ local MinBtn = Instance.new("TextButton")
 local ContentFrame = Instance.new("Frame")
 local ScrollFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
-local StatusLabel = Instance.new("TextLabel")
+local WarningLabel = Instance.new("TextLabel")
 local UIStroke = Instance.new("UIStroke")
 local UnloadTab = Instance.new("TextButton")
 
 -- Logic Variables
 local minimized = false
-local kiciaExecuted = false
-local secondaryButtons = {}
 
--- Root Setup (Larger GUI)
+-- Root Setup
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.Name = "vxy_ffa_main"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -24,7 +22,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
-MainFrame.Size = UDim2.new(0, 350, 0, 320)
+MainFrame.Size = UDim2.new(0, 350, 0, 350) -- Increased height for warning
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -36,7 +34,7 @@ MainCorner.Parent = MainFrame
 
 UIStroke.Parent = MainFrame
 UIStroke.Thickness = 2
-UIStroke.Color = Color3.fromRGB(40, 40, 40)
+UIStroke.Color = Color3.fromRGB(60, 60, 60)
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Top Bar
@@ -74,7 +72,7 @@ UnloadTab.TextSize = 16
 UnloadTab.Font = Enum.Font.Code
 
 -- Content Container
-ContentFrame.Size = UDim2.new(1, -20, 1, -50)
+ContentFrame.Size = UDim2.new(1, -20, 1, -85)
 ContentFrame.Position = UDim2.new(0, 10, 0, 45)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
@@ -89,85 +87,61 @@ UIListLayout.Parent = ScrollFrame
 UIListLayout.Padding = UDim.new(0, 8)
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-StatusLabel.Size = UDim2.new(1, 0, 0, 25)
-StatusLabel.Text = "status: awaiting core"
-StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-StatusLabel.Font = Enum.Font.Code
-StatusLabel.TextSize = 12
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Parent = ScrollFrame
+-- IMPORTANT ALERT LABEL
+WarningLabel.Size = UDim2.new(1, 0, 0, 40)
+WarningLabel.Position = UDim2.new(0, 0, 1, -40)
+WarningLabel.Parent = MainFrame
+WarningLabel.BackgroundColor3 = Color3.fromRGB(25, 10, 10)
+WarningLabel.Text = "!! DO NOT EXECUTE OTHER SCRIPTS !!\nUNTIL KICIA HAS LOADED"
+WarningLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+WarningLabel.Font = Enum.Font.Code
+WarningLabel.TextSize = 12
+WarningLabel.BorderSizePixel = 0
+
+local WarnCorner = Instance.new("UICorner")
+WarnCorner.CornerRadius = UDim.new(0, 4)
+WarnCorner.Parent = WarningLabel
 
 UnloadTab.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-local function createButton(name, url, isPrimary, isStaff)
+local function createButton(name, url, isStaff)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.95, 0, 0, 40)
     btn.Font = Enum.Font.Code
     btn.TextSize = 14
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = "EXECUTE: " .. name:upper()
     btn.Parent = ScrollFrame
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 4)
     corner.Parent = btn
 
-    if not isPrimary then
-        -- Initial Locked State
-        btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        btn.TextColor3 = Color3.fromRGB(80, 80, 80)
-        btn.Text = "LOCKED"
-        table.insert(secondaryButtons, {button = btn, label = name, link = url, staff = isStaff})
-    else
-        -- Primary Button
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.Text = "EXECUTE: " .. name:upper()
-        
-        btn.MouseButton1Click:Connect(function()
-            if kiciaExecuted then return end
-            kiciaExecuted = true
-            
-            btn.Text = "EXECUTING..."
-            StatusLabel.Text = "status: loading script..."
+    btn.MouseButton1Click:Connect(function()
+        btn.Text = "RUNNING..."
+        if isStaff then
+            _G.StaffDetectorLoading = false
+            loadstring(game:HttpGetAsync(url))()
+        else
             loadstring(game:HttpGet(url))()
-            
-            -- THE UNLOCK LOGIC
-            task.delay(3, function()
-                StatusLabel.Text = "status: active"
-                StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-                btn.Text = name:upper() .. " ACTIVE"
-                UIStroke.Color = Color3.fromRGB(0, 255, 100)
-                
-                for _, data in pairs(secondaryButtons) do
-                    data.button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                    data.button.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    data.button.Text = "EXECUTE: " .. data.label:upper()
-                    
-                    data.button.MouseButton1Click:Connect(function()
-                        data.button.Text = "RUNNING..."
-                        if data.staff then
-                            _G.StaffDetectorLoading = false
-                            loadstring(game:HttpGetAsync(data.link))()
-                        else
-                            loadstring(game:HttpGet(data.link))()
-                        end
-                        data.button.Text = data.label:upper() .. " READY"
-                    end)
-                end
-            end)
-        end)
-    end
+        end
+        task.wait(1)
+        btn.Text = name:upper() .. " READY"
+    end)
 end
 
--- Setup Buttons
-createButton("Kicia Hook", "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau", true)
-createButton("Auto Collect", "https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784", false)
-createButton("Anti-AFK", "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK", false)
-createButton("Staff Detector", "https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua", false, true)
-createButton("FPS Boost", "https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost", false)
+-- Setup Buttons (All unlocked)
+createButton("Kicia Hook", "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau")
+createButton("Auto Collect", "https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784")
+createButton("Anti-AFK", "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK")
+createButton("Staff Detector", "https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua", true)
+createButton("FPS Boost", "https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost")
 
 -- Standard Toggle
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
-    MainFrame:TweenSize(minimized and UDim2.new(0, 350, 0, 35) or UDim2.new(0, 350, 0, 320), "Out", "Quad", 0.2, true)
+    MainFrame:TweenSize(minimized and UDim2.new(0, 350, 0, 35) or UDim2.new(0, 350, 0, 350), "Out", "Quad", 0.2, true)
     MinBtn.Text = minimized and "+" or "_"
+    WarningLabel.Visible = not minimized
 end)
