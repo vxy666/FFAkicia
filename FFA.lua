@@ -1,32 +1,75 @@
-﻿loadstring(game:HttpGet("https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau"))()
+local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
-task.wait(5)
+local Window = Library:CreateWindow({
+    Title = 'vxy ultimate ffa script',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
 
-print("Kicia Hook injected!!!")
+local MainTab = Window:AddTab('Main')
 
-task.spawn(function()
-    -- FFA Auto Collect Boosters
-    loadstring(game:HttpGet("https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784"))()
-    print("FFA Auto Collect injected!!!")
-    task.wait(1)
+-- Left Side: Primary Loader
+local LeftGroupBox = MainTab:AddLeftGroupbox('Primary Loader')
 
-    -- Anti-AFK
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK"))()
-    print("Anti AFK injected!!!")
-    task.wait(1)
+LeftGroupBox:AddButton({
+    Text = 'Inject Kicia Hook',
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau"))()
+        Library:Notify('Kicia Hook injected!', 3)
+    end
+})
 
-    -- Staff Detector
-    shared.StaffDetectorLoading = false
-    autoload = false
-    loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua"))()
-    print("Staff Detector injected!!!")
-    task.wait(1)
+-- Right Side: Utility Modules
+local RightGroupBox = MainTab:AddRightGroupbox('Modules')
 
-    -- FPS Boost
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost"))()
-    print("FPS Boost injected!!!")
+RightGroupBox:AddButton({
+    Text = 'FFA Auto Collect',
+    Func = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784"))()
+        Library:Notify('FFA Auto Collect injected!', 3)
+    end
+})
 
-    print("==============================")
-    print("Injection Complete!!!")
-    print("==============================")
+RightGroupBox:AddButton({
+    Text = 'Anti-AFK',
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK"))()
+        Library:Notify('Anti-AFK injected!', 3)
+    end
+})
+
+RightGroupBox:AddButton({
+    Text = 'Staff Detector',
+    Func = function()
+        shared.StaffDetectorLoading = false
+        autoload = false
+        loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua"))()
+        Library:Notify('Staff Detector injected!', 3)
+    end
+})
+
+RightGroupBox:AddButton({
+    Text = 'FPS Boost',
+    Func = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost"))()
+        Library:Notify('FPS Boost injected!', 3)
+    end
+})
+
+-- Management Section
+local SettingsGroupBox = MainTab:AddLeftGroupbox('Settings')
+
+SettingsGroupBox:AddButton('Unload Menu', function() 
+    Library:Unload() 
 end)
+
+SettingsGroupBox:AddLabel('Toggle Key'):AddKeyPicker('MenuKeybind', { 
+    Default = 'RightControl', 
+    NoUI = true, 
+    Text = 'Menu keybind' 
+})
+
+Library:Notify('vxy ultimate ffa script loaded | Press Right Control', 5)
