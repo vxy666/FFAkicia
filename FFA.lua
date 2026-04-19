@@ -1,88 +1,225 @@
-print("[vxy debug] Script started. Initializing Library...")
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TopBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local MinBtn = Instance.new("TextButton")
+local ContentFrame = Instance.new("Frame")
+local ScrollFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+local StatusLabel = Instance.new("TextLabel")
+local UIGradient = Instance.new("UIGradient")
+local UIStroke = Instance.new("UIStroke")
 
-local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
-local LibrarySuccess, Library = pcall(function()
-    return loadstring(game:HttpGet(repo .. 'Library.lua'))()
-end)
+-- Tab System for Unload
+local UnloadTab = Instance.new("TextButton")
+local CloseBtn = Instance.new("TextButton")
 
-if not LibrarySuccess or not Library then
-    warn("[vxy error] Failed to load LinoriaLib. Check your internet or the URL.")
-    return
-end
+-- Logic Variables
+local minimized = false
+local kiciaExecuted = false
+local secondaryButtons = {}
 
-print("[vxy debug] Library loaded. Creating Window...")
+-- Root Setup
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Name = "vxys_ffa_cyber"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local Window = Library:CreateWindow({
-    Title = 'vxy ultimate ffa script',
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
-})
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+MainFrame.Position = UDim2.new(0.5, -135, 0.5, -110)
+MainFrame.Size = UDim2.new(0, 270, 0, 220)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
 
-print("[vxy debug] Window created. Adding Tabs...")
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 6)
+MainCorner.Parent = MainFrame
 
-local Tabs = {
-    Main = Window:AddTab('Main'),
+-- Neon Glow Border
+UIStroke.Parent = MainFrame
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+UIGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))
 }
+UIGradient.Rotation = 45
+UIGradient.Parent = UIStroke
 
--- Left Side: Primary Loader
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Primary Loader')
+-- Top Bar
+TopBar.Size = UDim2.new(1, 0, 0, 28)
+TopBar.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
 
-print("[vxy debug] Initializing Buttons...")
+Title.Parent = TopBar
+Title.Size = UDim2.new(1, -60, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Text = "vxy's ffa // CYBERNETICS"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.Code
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextSize = 13
 
-LeftGroupBox:AddButton({
-    Text = 'Inject Kicia Hook',
-    Func = function()
-        print("[vxy debug] Injected Kicia Hook button pressed.")
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau"))()
-        end)
-        if success then 
-            Library:Notify('Kicia Hook injected!', 3) 
-        else 
-            warn("[vxy error] Kicia Hook failed: " .. tostring(err))
-        end
-    end
-})
+MinBtn.Parent = TopBar
+MinBtn.Size = UDim2.new(0, 28, 0, 28)
+MinBtn.Position = UDim2.new(1, -28, 0, 0)
+MinBtn.BackgroundTransparency = 1
+MinBtn.Text = "_"
+MinBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+MinBtn.TextSize = 18
+MinBtn.Font = Enum.Font.Code
 
--- Right Side: Utility Modules
-local RightGroupBox = Tabs.Main:AddRightGroupbox('Modules')
+UnloadTab.Parent = TopBar
+UnloadTab.Size = UDim2.new(0, 28, 0, 28)
+UnloadTab.Position = UDim2.new(1, -56, 0, 0)
+UnloadTab.BackgroundTransparency = 1
+UnloadTab.Text = "X"
+UnloadTab.TextColor3 = Color3.fromRGB(150, 0, 0)
+UnloadTab.TextSize = 16
+UnloadTab.Font = Enum.Font.GothamBold
 
-local function SafeLoad(name, url)
-    print("[vxy debug] Attempting to load module: " .. name)
-    local success, err = pcall(function()
-        loadstring(game:HttpGet(url))()
-    end)
-    if success then
-        Library:Notify(name .. ' injected!', 3)
+-- Content
+ContentFrame.Size = UDim2.new(1, -10, 1, -38)
+ContentFrame.Position = UDim2.new(0, 5, 0, 33)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Parent = MainFrame
+
+ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+ScrollFrame.ScrollBarThickness = 1
+ScrollFrame.Parent = ContentFrame
+
+UIListLayout.Parent = ScrollFrame
+UIListLayout.Padding = UDim.new(0, 12)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.Text = "// SYSTEM IDLE :: AWAITING CORE"
+StatusLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+StatusLabel.Font = Enum.Font.Code
+StatusLabel.TextSize = 10
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Parent = ScrollFrame
+
+-- Unload UI Logic
+UnloadTab.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Button Creation (Fancy AF)
+local function createCyberButton(name, titleText, url, isPrimary, isStaff)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.95, 0, 0, 45)
+    container.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    container.BorderSizePixel = 0
+    container.Parent = ScrollFrame
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = container
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Parent = container
+    stroke.Thickness = 1
+    stroke.Color = Color3.fromRGB(30, 30, 35)
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Parent = container
+    titleLabel.Size = UDim2.new(1, -10, 0, 15)
+    titleLabel.Position = UDim2.new(0, 5, 0, 4)
+    titleLabel.Text = titleText:upper()
+    titleLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.Code
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.TextSize = 10
+
+    local btn = Instance.new("TextButton")
+    btn.Parent = container
+    btn.Size = UDim2.new(1, -10, 0, 22)
+    btn.Position = UDim2.new(0, 5, 0, 19)
+    btn.Font = Enum.Font.Code
+    btn.TextSize = 13
+    btn.BorderSizePixel = 0
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 3)
+    btnCorner.Parent = btn
+
+    if not isPrimary then
+        btn.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+        btn.TextColor3 = Color3.fromRGB(60, 60, 65)
+        btn.Text = "[ LOCKED ]"
+        table.insert(secondaryButtons, {button = btn, originalName = "[ EXECUTE: "..name:upper().." ]", link = url, staff = isStaff, containerStroke = stroke})
     else
-        warn("[vxy error] " .. name .. " failed: " .. tostring(err))
-        Library:Notify('Failed to load ' .. name, 3)
+        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "[ EXECUTE: "..name:upper().." ]"
+        
+        btn.MouseButton1Click:Connect(function()
+            if kiciaExecuted then return end
+            kiciaExecuted = true
+            btn.Text = "LOADING CORE..."
+            loadstring(game:HttpGet(url))()
+            
+            task.spawn(function()
+                for i = 5, 1, -1 do
+                    StatusLabel.Text = "// DECRYPTING DEPENDENCIES :: " .. i .. "s"
+                    task.wait(1)
+                end
+                StatusLabel.Text = "// SYSTEM ACTIVE // NETWORK ESTABLISHED"
+                StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 200)
+                btn.Text = "[ "..name:upper().." :: ACTIVE ]"
+                btn.TextColor3 = Color3.fromRGB(0, 255, 150)
+                
+                -- Global Flex Unlock Animation
+                UIStroke.Color = Color3.fromRGB(0, 255, 255) -- Main border glow
+                
+                -- Unlock others
+                for _, data in pairs(secondaryButtons) do
+                    data.button.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+                    data.button.TextColor3 = Color3.fromRGB(200, 200, 200)
+                    data.button.Text = data.originalName
+                    data.containerStroke.Color = Color3.fromRGB(50, 50, 60)
+                    
+                    data.button.MouseButton1Click:Connect(function()
+                        data.button.Text = "INJECTING..."
+                        if data.staff then
+                            shared.StaffDetectorLoading = false
+                            autoload = false
+                            loadstring(game:HttpGetAsync(data.link))()
+                        else
+                            loadstring(game:HttpGet(data.link))()
+                        end
+                        data.button.Text = "[ "..data.originalName:match(": (.*)%s%]"):upper().." :: ONLINE ]"
+                        data.button.TextColor3 = Color3.fromRGB(0, 255, 150)
+                        data.containerStroke.Color = Color3.fromRGB(0, 150, 100)
+                    end)
+                end
+            end)
+        end)
     end
 end
 
-RightGroupBox:AddButton({ Text = 'FFA Auto Collect', Func = function() SafeLoad('FFA Auto Collect', "https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784") end })
-RightGroupBox:AddButton({ Text = 'Anti-AFK', Func = function() SafeLoad('Anti-AFK', "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK") end })
-RightGroupBox:AddButton({ Text = 'FPS Boost', Func = function() SafeLoad('FPS Boost', "https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost") end })
+-- POPULATE MODULES WITH TITLES
+createCyberButton("Kicia Hook", "Core System Loader", "https://raw.githubusercontent.com/kiciahook/kiciahook/refs/heads/main/loader.luau", true)
+createCyberButton("Auto Collect", "FFA Booster Automation", "https://rawscripts.net/raw/RIVALS-FFA-Auto-Collect-Boosters-139784", false)
+createCyberButton("Anti-AFK", "Idle Prevention Protocol", "https://raw.githubusercontent.com/Nicht-Reden/Ultimate-FFa-HUB-Rivals-/refs/heads/main/Anti%20AFK", false)
+createCyberButton("Staff Detector", "Moderator Surveillance", "https://raw.githubusercontent.com/Ukrubojvo/Modules/main/StaffDetector.lua", false, true)
+createCyberButton("FPS Boost", "Graphics & Performance Optimizer", "https://raw.githubusercontent.com/pouloupatisfilipp-rgb/ffa_fpsboost_/main/fpsboost", false)
 
--- Management Section
-local SettingsGroupBox = Tabs.Main:AddLeftGroupbox('Settings')
-
-SettingsGroupBox:AddButton('Unload Menu', function() 
-    print("[vxy debug] Unloading UI...")
-    Library:Unload() 
+-- Standard Toggle Logic
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    MainFrame:TweenSize(minimized and UDim2.new(0, 270, 0, 28) or UDim2.new(0, 270, 0, 220), "Out", "Quad", 0.2, true)
+    MinBtn.Text = minimized and "+" or "_"
 end)
-
-SettingsGroupBox:AddLabel('Toggle Key'):AddKeyPicker('MenuKeybind', { 
-    Default = 'RightControl', 
-    NoUI = true, 
-    Text = 'Menu keybind' 
-})
-
--- Finalizing
-print("[vxy debug] Linking ToggleKeybind...")
-Library.ToggleKeybind = Options.MenuKeybind 
-
-print("[vxy debug] Script fully loaded! Use RightControl to toggle.")
-Library:Notify('vxy ultimate ffa script loaded | Press Right Control', 5)
